@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="libflux" />
+		<Option makefile="Makefile.gl-sdl" />
+		<Option makefile_is_custom="1" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<MakeCommands>
+			<Build command="$make -f $makefile $target" />
+			<CompileFile command="$make -f $makefile $file" />
+			<Clean command="$make -f $makefile clean" />
+			<DistClean command="$make -f $makefile distclean$target" />
+			<AskRebuildNeeded command="$make -q -f $makefile $target" />
+			<SilentBuild command="$make -s -f $makefile $target" />
+		</MakeCommands>
+		<Build>
+			<Target title="all">
+				<Option output="libflux" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="./obj/Debug/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+				</Compiler>
+				<MakeCommands>
+					<Build command="$make -f $makefile $target" />
+					<CompileFile command="$make -f $makefile $file" />
+					<Clean command="$make -f $makefile clean" />
+					<DistClean command="$make -f $makefile distclean$target" />
+					<AskRebuildNeeded command="$make -q -f $makefile $target" />
+					<SilentBuild command="$make -s -f $makefile $target" />
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="Makefile.gl-sdl" />
+		<Unit filename="data/gl_sdl/data.asm" />
+		<Unit filename="src/action_queue.cpp" />
+		<Unit filename="src/action_queue.h" />
+		<Unit filename="src/defgroups.cpp" />
+		<Unit filename="src/defs.h" />
+		<Unit filename="src/dep_gl_sdl.cpp" />
+		<Unit filename="src/flux.cpp" />
+		<Unit filename="src/flux.h" />
+		<Unit filename="src/hash.cpp" />
+		<Unit filename="src/hash.h" />
+		<Unit filename="src/line.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mkfonttab.cpp" />
+		<Unit filename="src/multiline.cpp" />
+		<Unit filename="src/prop_list.cpp" />
+		<Unit filename="src/prop_list.h" />
+		<Unit filename="src/sys.h" />
+		<Unit filename="src/sys_sdl.cpp" />
+		<Unit filename="src/timers.cpp" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

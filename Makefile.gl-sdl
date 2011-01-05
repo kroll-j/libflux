@@ -1,0 +1,41 @@
+all:	lib/libflux-gl_sdl.a mkfonttab
+run:	all
+clean:	#
+		-rm -f $(OBJS) $(DEPS) lib/libflux-gl_sdl.a
+
+CPPFLAGS+= -O0 -ggdb
+# -O2 -ffast-math -ggdb
+
+SRC= flux.cpp action_queue.cpp hash.cpp prop_list.cpp timers.cpp defgroups.cpp multiline.cpp sys_sdl.cpp dep_gl_sdl.cpp mkfonttab.cpp
+
+OBJS= $(addprefix obj/,$(SRC:.cpp=.o)) obj/data.o
+DEPS= $(addprefix obj/.,$(SRC:.cpp=.d))
+
+-include $(DEPS)
+
+obj/.%.d: src/%.cpp
+	@set -e; rm -f $@; \
+		$(CC) -M $(CPPFLAGS) $< > $@.$$$$; \
+		sed 's,\($*\)\.o[:]*,obj/\1.o $@: ,g' < $@.$$$$ > $@; \
+		rm -f $@.$$$$
+
+obj/%.o: src/%.cpp
+	@echo " * $<"
+	@g++ -c $(CPPFLAGS) $< -o $@
+
+obj/data.o: data/gl_sdl/*
+	@echo " * $@"
+	@cd data/gl_sdl; as data.S -o ../../$@
+
+DEFAULT_FONT= data/gl_sdl/default_font_2.png
+DEFAULT_FONT_HEIGHT= 13
+data/gl_sdl/default_font.h: $(DEFAULT_FONT) Makefile.gl-sdl
+	@echo " * $<"
+	@./mkfonttab $(DEFAULT_FONT) $(DEFAULT_FONT_HEIGHT) -n default_font_texcoords -m 0 > data/gl_sdl/default_font.h
+
+mkfonttab: obj/mkfonttab.o
+	g++ $(CPPFLAGS) $< -o $@ -lfreeimage
+
+lib/libflux-gl_sdl.a: data/gl_sdl/default_font.h $(OBJS)
+	ar -cru $@ $(OBJS)
+

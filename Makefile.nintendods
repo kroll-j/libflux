@@ -1,0 +1,122 @@
+#---------------------------------------------------------------------------------
+.SUFFIXES:
+#---------------------------------------------------------------------------------
+
+ifeq ($(strip $(DEVKITARM)),)
+$(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
+endif
+
+include $(DEVKITARM)/ds_rules
+
+#---------------------------------------------------------------------------------
+# TARGET is the name of the output
+# BUILD is the directory where object files & intermediate files will be placed
+# SOURCES is a list of directories containing source code
+# DATA is a list of directories containing data files
+# INCLUDES is a list of directories containing header files
+#---------------------------------------------------------------------------------
+TARGET		:=	flux_nds
+BUILD		:=	nds/build
+SOURCES		:=	.
+DATA		:=	nds/data
+INCLUDES	:=	.
+
+#---------------------------------------------------------------------------------
+# options for code generation
+#---------------------------------------------------------------------------------
+ARCH	:=	-mthumb -mthumb-interwork
+
+CFLAGS	:=	-g -Wall -O2\
+		-march=armv5te -mtune=arm946e-s \
+		-fomit-frame-pointer -ffast-math \
+		$(ARCH) -I$(DEVKITPRO)/libnds/include
+
+CFLAGS	+=	$(INCLUDE) -DARM9 -DFLUX_NDS
+CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
+
+ASFLAGS	:=	-g $(ARCH) -march=armv5te -mtune=arm946e-s
+LDFLAGS	=	-specs=ds_arm9.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
+
+#---------------------------------------------------------------------------------
+# no real need to edit anything past this point unless you need to add additional
+# rules for different file extensions
+#---------------------------------------------------------------------------------
+ifneq ($(BUILD),$(notdir $(CURDIR)))
+#---------------------------------------------------------------------------------
+
+export OUTPUT	:=	$(CURDIR)/lib/lib$(TARGET).a
+
+export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
+			$(foreach dir,$(DATA),$(CURDIR)/$(dir))
+
+export DEPSDIR	:=	$(CURDIR)/$(BUILD)
+
+CFILES		:=	
+CPPFILES	:=	action_queue.cpp hash.cpp defgroups.cpp multiline.cpp flux.cpp prop_list.cpp timers.cpp dep_nds.cpp sys_nds.cpp
+SFILES		:=	
+BINFILES	:=	ndsfont.pcx.lz77
+
+#---------------------------------------------------------------------------------
+# use CXX for linking C++ projects, CC for standard C
+#---------------------------------------------------------------------------------
+ifeq ($(strip $(CPPFILES)),)
+#---------------------------------------------------------------------------------
+	export LD	:=	$(CC)
+#---------------------------------------------------------------------------------
+else
+#---------------------------------------------------------------------------------
+	export LD	:=	$(CXX)
+#---------------------------------------------------------------------------------
+endif
+#---------------------------------------------------------------------------------
+
+export OFILES	:=	$(addsuffix .o,$(BINFILES)) \
+			$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
+
+export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
+			$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
+			-I$(CURDIR)/$(BUILD)
+
+.PHONY: $(BUILD) clean all
+
+#---------------------------------------------------------------------------------
+all: $(BUILD)
+
+lib:
+	@[ -d $@ ] || mkdir -p $@
+	
+$(BUILD): lib
+	@[ -d $@ ] || mkdir -p $@
+	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile.nintendods
+
+#---------------------------------------------------------------------------------
+clean:
+	@echo clean ...
+	@rm -fr $(BUILD) lib
+
+#---------------------------------------------------------------------------------
+else
+
+DEPENDS	:=	$(OFILES:.o=.d)
+
+#---------------------------------------------------------------------------------
+# main targets
+#---------------------------------------------------------------------------------
+$(OUTPUT)	:	$(OFILES)
+
+#---------------------------------------------------------------------------------
+%.lz77.o:	%.lz77
+	@echo $(notdir $<)
+	@$(bin2o)
+
+%.bin.o	:	%.bin
+#---------------------------------------------------------------------------------
+	@echo $(notdir $<)
+	@$(bin2o)
+
+
+-include $(DEPENDS)
+
+#---------------------------------------------------------------------------------------
+endif
+#---------------------------------------------------------------------------------------
